@@ -8,13 +8,12 @@ size = (width, height)
 bgcolour = (0, 0, 0)
 ON_COLOUR = (0, 0, 0)
 OFF_COLOUR = (255, 255, 255)
-radius = 20
-fps = 30
-columns = width//radius
-rows = height//radius
+radius = 25
+fps = 10
+columns = round((width/2))//radius
+rows = (round(height/1.5))//radius
 grid_size =(columns, rows)
 apothem = radius / (2*tan(pi/6))
-#dick ={}
 def main():
     run = True
     pause = False
@@ -34,14 +33,13 @@ def main():
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_p:
                     pause = not pause
-        # if pygame.mouse.get_pressed()[0]:
-        #     hex_x, hex_y = pygame.mouse.get_pos()
-        #     # x = x//radius
-        #     # y = y//radius
-        #     x = dick[[hex_x, hex_y]][0]
-        #     y = dick[[hex_x, hex_y]][1]
-        #     print(x, y)
-        #     array[x][y] = 1 
+            if event.type ==pygame.MOUSEBUTTONDOWN:
+                x,y = pygame.mouse.get_pos()
+                x= x//radius%rows
+                y= y//radius%columns
+                print(x,y)
+                array[x][y] = 1
+
         pygame.display.update()
 
 def draw_hexagram(surface, x, y, radius, colour):
@@ -55,27 +53,27 @@ def draw_hexagram(surface, x, y, radius, colour):
 def game_of_life(surface, array):
     for x in range(columns):
         for y in range(rows):
-            #random_colour = (random.randint(0,255), random.randint(0,255), random.randint(0,255))
             hex_x = (x + y * 0.5 - y // 2 ) * (apothem * 2) #(x + z * 0.5f - z / 2) * (HexMetrics.innerRadius * 2f)
             hex_y = (y * radius * 1.5) #position.z = z * (HexMetrics.outerRadius * 1.5f);
-            #dick[[hex_x, hex_y]] = [x, y]
             if array[x][y] == 1:
                 draw_hexagram(surface, hex_x, hex_y, radius - 2, ON_COLOUR)
             else:
                 draw_hexagram(surface, hex_x, hex_y, radius - 2, OFF_COLOUR)
 
 def next_array(array, pause):
-    if pause == False:
+    if pause == True:
         next = array.copy()
         for x in range(columns):
             for y in range(rows):
                 state = next[x][y]
                 neighbours = get_neighbours(array, x, y)
-                if state == 1 and (neighbours < 2 or neighbours > 3):
+                if state == 1 and neighbours < 2 or neighbours >3:
                     next[x][y] = 0
                 elif state == 0 and neighbours == 3:
                     next[x][y] = 1
         array = next
+        return array  
+    else:
         return array    
 
 
