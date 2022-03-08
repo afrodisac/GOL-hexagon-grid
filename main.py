@@ -69,7 +69,7 @@ def next_array(array, pause):
                 neighbours = get_neighbours(array, x, y)
                 if state == 1 and neighbours < 2 or neighbours >2:
                     next[x][y] = 0
-                    
+
                 elif state == 0 and neighbours == 2:
                     next[x][y] = 1
         array = next
@@ -77,7 +77,7 @@ def next_array(array, pause):
     else:
         return array    
 
-
+## this would be if there were no differences between even and odd rows
 # def get_neighbours(next, x, y):
 #     total = 0
 #     for i in range(-1, 1):
