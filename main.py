@@ -3,8 +3,6 @@ import random
 import numpy as np
 from math import cos, sin, pi, tan
 
-
-
 width, height = 800, 800
 size = (width, height)
 bgcolour = (0, 0, 0)
@@ -71,10 +69,9 @@ def next_array(array, pause):
                 neighbours = get_neighbours(array, x, y)
                 if state == 1 and neighbours < 2 or neighbours >2:
                     next[x][y] = 0
-                    # print(x,y)
+                    
                 elif state == 0 and neighbours == 2:
                     next[x][y] = 1
-                    print(x,y)
         array = next
         return array  
     else:
