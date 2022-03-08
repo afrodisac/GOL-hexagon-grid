@@ -5,15 +5,15 @@ from math import cos, sin, pi, tan
 
 
 
-width, height = 1000, 1000
+width, height = 800, 800
 size = (width, height)
 bgcolour = (0, 0, 0)
 ON_COLOUR = (106,13, 173)
 OFF_COLOUR = (60, 60, 60)
-radius = 25
-fps = 10
-columns = width//radius
-rows = height//radius
+radius = 30
+fps = 60
+columns = round(width/2)//radius
+rows = round(height/1.5)//radius
 grid_size =(columns, rows)
 apothem = radius / (2*tan(pi/6))
 def main():
@@ -29,7 +29,7 @@ def main():
         game_of_life(surface, array)
         array = next_array(array, pause)
         clock.tick(fps)
-        # pygame.time.delay(500)
+        pygame.time.delay(200)
         for event in pygame.event.get():
             if event.type ==pygame.QUIT:
                 run = False
@@ -55,8 +55,8 @@ def draw_hexagram(surface, x, y, radius, colour):
 def game_of_life(surface, array):
     for x in range(columns):
         for y in range(rows):
-            hex_x = (x + y * 0.5 - y // 2 ) * (apothem * 2) #(x + z * 0.5f - z / 2) * (HexMetrics.innerRadius * 2f)
-            hex_y = (y * radius * 1.5) #position.z = z * (HexMetrics.outerRadius * 1.5f);
+            hex_x = (0.5 + x + y * 0.5 - y // 2 ) * (apothem * 2) #(x + z * 0.5f - z / 2) * (HexMetrics.innerRadius * 2f)
+            hex_y = ((y+1)  * radius * 1.5) #position.z = z * (HexMetrics.outerRadius * 1.5f);
             if array[x][y] == 1:
                 draw_hexagram(surface, hex_x, hex_y, radius - 2, ON_COLOUR)
             else:
