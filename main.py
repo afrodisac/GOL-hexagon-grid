@@ -12,7 +12,7 @@ ON_COLOUR = (106,13, 173)
 OFF_COLOUR = (60, 60, 60)
 radius = 30
 fps = 60
-columns = round(width/2)//radius
+columns = round(width/1.7)//radius
 rows = round(height/1.5)//radius
 grid_size =(columns, rows)
 apothem = radius / (2*tan(pi/6))
@@ -56,7 +56,7 @@ def game_of_life(surface, array):
     for x in range(columns):
         for y in range(rows):
             hex_x = (0.5 + x + y * 0.5 - y // 2 ) * (apothem * 2) #(x + z * 0.5f - z / 2) * (HexMetrics.innerRadius * 2f)
-            hex_y = ((y+1)  * radius * 1.5) #position.z = z * (HexMetrics.outerRadius * 1.5f);
+            hex_y = ((y+0.86)  * radius * 1.5) #position.z = z * (HexMetrics.outerRadius * 1.5f);
             if array[x][y] == 1:
                 draw_hexagram(surface, hex_x, hex_y, radius - 2, ON_COLOUR)
             else:
@@ -128,7 +128,7 @@ def make_random_grid():
     array = np.ndarray(shape=(grid_size))
     for i in range(columns):
         for j in range(rows):
-            array[i][j] = 0# random.randint(0,1)
+            array[i][j] = random.randint(0,1)
 
     return array
 
