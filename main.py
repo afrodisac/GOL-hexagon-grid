@@ -8,15 +8,19 @@ from math import cos, sin, pi, tan
 from copy import deepcopy
 
 # screen dimensions
-width, height = 800, 800
+width, height = 1000, 1000
 size = (width, height)
+
 #colours of the board and the hexagons
 bgcolour = (0, 0, 0)
 ON_COLOUR = (106,13, 173)
 OFF_COLOUR = (60, 60, 60)
+
 #size of hexagons
-radius = 25
+radius = 15
+
 fps = 60
+
 #creating rows and columns based on the screen dimensions
 columns = round(width/1.7)//radius
 rows = round(height/1.5)//radius
@@ -29,6 +33,8 @@ def main():
     # left click = ON; right click = OFF
     # *quick footnote is I couldn't get the mapping to work so if you
     # want to draw on the board you need to play around with it
+    # and sometimes it goes out of bounds...
+
     run = True
     pause = False
     pygame.init()
@@ -37,13 +43,17 @@ def main():
     surface.fill(bgcolour)
     array = make_random_grid()
     clock = pygame.time.Clock()
+
     # main game loop. when you run the code you must press p to play
     # or pause
     while run:
         array = next_array(array, pause)
         game_of_life(surface, array)
+
         # setting framerate
         clock.tick(fps)
+
+        #checking for buttons clicks or if exit button is clicked
         pygame.time.delay(200)
         for event in pygame.event.get():
             if event.type ==pygame.QUIT:
@@ -73,7 +83,7 @@ def draw_hexagram(surface, x, y, radius, colour):
         pts.append([pt_x, pt_y])
     pygame.draw.polygon(surface, colour, pts)
 
-#function to get the co-ordinates for the hexagons and draw them
+# function to get the co-ordinates for the hexagons and draw them
 # with colours and includes the offsets
 def game_of_life(surface, array):
     for x in range(columns):
@@ -84,17 +94,15 @@ def game_of_life(surface, array):
                 draw_hexagram(surface, hex_x, hex_y, radius - 2, ON_COLOUR)
             else:
                 draw_hexagram(surface, hex_x, hex_y, radius - 2, OFF_COLOUR)
+
 # This function returns the new array based on the neighbours
 def next_array(array, pause):
-    number_of_neighbours_array = deepcopy(array)
-    if pause == True:
-        
+    if pause == True:      
         next = deepcopy(array)
         for x in range(columns):
             for y in range(rows):
                 state = array[x][y]
                 neighbours = get_neighbours(array, x, y)
-                number_of_neighbours_array[x][y] = neighbours
                 if state == 1 and neighbours < 2:
                     next[x][y] = 0
                 elif state == 1 and neighbours > 2:
@@ -103,7 +111,6 @@ def next_array(array, pause):
                     next[x][y] = 1
                 else: next[x][y] = state
         array = next
-        print(number_of_neighbours_array)
         return array  
     else:
         return array    
@@ -115,9 +122,11 @@ def next_array(array, pause):
 def get_neighbours(next, x,y):
 
     total = 0
-    #co-ordinates of neighbours for even and odd row (my_row is even)
+
+    # co-ordinates of neighbours for even and odd row (my_row is even)
     my_row = [[-1, -1], [-1, +1], [0, +1], [+1, 0], [0, -1], [-1, 0]]
     my_row_odd = [[1, 1], [-1, 0], [0, -1], [+1, 0], [0, +1], [+1, -1]]
+    
     # looks at even and odd row. The following I realise I could have 
     # done in a for loop but I am too lazy to do it. Also it works now and
     # i'm scared i'll break it haha
@@ -141,6 +150,7 @@ def get_neighbours(next, x,y):
 def make_random_grid():
     # Here is where I make the array. I' ve set each element
     # to zero but if you uncomment and remove the zero it will 
+    
     #create a random board
     array = np.ndarray(shape=(grid_size))
     for i in range(columns):
