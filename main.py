@@ -17,7 +17,7 @@ ON_COLOUR = (106,13, 173)
 OFF_COLOUR = (60, 60, 60)
 
 #size of hexagons
-radius = 15
+radius = 25
 
 fps = 60
 
@@ -107,7 +107,7 @@ def next_array(array, pause):
                     next[x][y] = 0
                 elif state == 1 and neighbours > 2:
                     next[x][y] = 0
-                elif state == 0 and neighbours == 2:
+                elif state == 0 and neighbours == 2 and random.randint(1,12) != 2:
                     next[x][y] = 1
                 else: next[x][y] = state
         array = next
