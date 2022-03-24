@@ -1,14 +1,17 @@
 # here is a link to the website I got the rules: I was successful!:
 # https://arunarjunakani.github.io/HexagonalGameOfLife/
+# I should add a funcion to calculate the density and visualise it
+# fix the mouse mapping
+# make co-ordinate system axial / cubic
 
 import pygame
 import random
 import numpy as np
-from math import cos, sin, pi, tan
+from math import cos, sin, pi, tan, floor
 from copy import deepcopy
 
 # screen dimensions
-width, height = 1000, 1000
+width, height = 800, 800
 size = (width, height)
 
 #colours of the board and the hexagons
@@ -17,15 +20,15 @@ ON_COLOUR = (106,13, 173)
 OFF_COLOUR = (60, 60, 60)
 
 #size of hexagons
-radius = 25
+radius = 15 # outer radius or height
 
 fps = 60
 
 #creating rows and columns based on the screen dimensions
-columns = round(width/1.7)//radius
-rows = round(height/1.5)//radius
+columns = 20
+rows = 25
 grid_size =(columns, rows)
-apothem = radius / (2*tan(pi/6))
+apothem = radius / (2*tan(pi/6)) #inner radius or width
 
 def main():
     #I use pygame to visualize everything based on the array.
@@ -62,10 +65,17 @@ def main():
                 if event.key == pygame.K_p:
                     pause = not pause
             if pygame.mouse.get_pressed()[0]:
+                pos = []
                 x,y = pygame.mouse.get_pos()
-                x= x//radius%rows
-                y= y//radius%columns
-                array[x][y] = 1
+                # x = x//radius
+                # y = y//radius
+                pos = find_hexagon(x, y)
+                print(pos)
+
+
+                # x= x//radius%rows
+                # y= y//radius%columns
+                array[pos[0]][pos[1]] = 1
             if pygame.mouse.get_pressed()[2]:
                 x,y = pygame.mouse.get_pos()
                 x= x//radius%rows
@@ -88,7 +98,7 @@ def draw_hexagram(surface, x, y, radius, colour):
 def game_of_life(surface, array):
     for x in range(columns):
         for y in range(rows):
-            hex_x = (0.5 + x + y * 0.5 - y // 2 ) * (apothem * 2) #(x + z * 0.5f - z / 2) * (HexMetrics.innerRadius * 2f)
+            hex_x = (0.5 + x + y * 0.5  ) * (apothem * 2) #(x + z * 0.5f - z / 2) * (HexMetrics.innerRadius * 2f)
             hex_y = ((y+0.86)  * radius * 1.5) #position.z = z * (HexMetrics.outerRadius * 1.5f);
             if array[x][y] == 1:
                 draw_hexagram(surface, hex_x, hex_y, radius - 2, ON_COLOUR)
@@ -107,7 +117,7 @@ def next_array(array, pause):
                     next[x][y] = 0
                 elif state == 1 and neighbours > 2:
                     next[x][y] = 0
-                elif state == 0 and neighbours == 2 and random.randint(1,12) != 2:
+                elif state == 0 and neighbours == 2:# and random.randint(1,12) != 2:
                     next[x][y] = 1
                 else: next[x][y] = state
         array = next
@@ -120,30 +130,39 @@ def next_array(array, pause):
 # first or last column/row you look at the other side of the grid to 
 # calculate neighbours (that's why you see the mod(%) here)
 def get_neighbours(next, x,y):
-
+    # x, y = offset_to_axial(x, y)
     total = 0
 
     # co-ordinates of neighbours for even and odd row (my_row is even)
     my_row = [[-1, -1], [-1, +1], [0, +1], [+1, 0], [0, -1], [-1, 0]]
     my_row_odd = [[1, 1], [-1, 0], [0, -1], [+1, 0], [0, +1], [+1, -1]]
     
-    # looks at even and odd row. The following I realise I could have 
-    # done in a for loop but I am too lazy to do it. Also it works now and
-    # i'm scared i'll break it haha
-    if y%2 == 0:
-        total += next[(x +my_row[0][0] + columns)%columns][(y + my_row[0][1] +rows)%rows]
-        total += next[(x +my_row[1][0] + columns)%columns][(y + my_row[1][1] +rows)%rows]
-        total += next[(x +my_row[2][0] + columns)%columns][(y + my_row[2][1] +rows)%rows]
-        total += next[(x +my_row[3][0] + columns)%columns][(y + my_row[3][1] +rows)%rows]
-        total += next[(x +my_row[4][0] + columns)%columns][(y + my_row[4][1] +rows)%rows]
-        total += next[(x +my_row[5][0] + columns)%columns][(y + my_row[5][1] +rows)%rows]
-    else:
-        total += next[(x +my_row_odd[0][0] + columns)%columns][(y+ my_row_odd[0][1] +rows)%rows]
-        total += next[(x +my_row_odd[1][0] + columns)%columns][(y+ my_row_odd[1][1] +rows)%rows]
-        total += next[(x +my_row_odd[2][0] + columns)%columns][(y+ my_row_odd[2][1] +rows)%rows]
-        total += next[(x +my_row_odd[3][0] + columns)%columns][(y+ my_row_odd[3][1] +rows)%rows]
-        total += next[(x +my_row_odd[4][0] + columns)%columns][(y+ my_row_odd[4][1] +rows)%rows]
-        total += next[(x +my_row_odd[5][0] + columns)%columns][(y+ my_row_odd[5][1] +rows)%rows]
+    #axial co-ordinates
+    axial_neighbours = [[0, -1], [-1, 0], [0, +1], [+1, 0], [+1, -1], [-1, 1]]
+
+    # axial coordinates
+    for i in range(6):
+        total += next[(x +axial_neighbours[i][0] + columns)%columns][(y + axial_neighbours[i][1] +rows)%rows]
+
+    # looks at even and odd row.
+    # if y%2 == 0:
+        #for i in range(6):
+            #total += next[(x +my_row[i][0] + columns)%columns][(y + my_row[i][1] +rows)%rows]
+    #     total += next[(x +my_row[0][0] + columns)%columns][(y + my_row[0][1] +rows)%rows]
+    #     total += next[(x +my_row[1][0] + columns)%columns][(y + my_row[1][1] +rows)%rows]
+    #     total += next[(x +my_row[2][0] + columns)%columns][(y + my_row[2][1] +rows)%rows]
+    #     total += next[(x +my_row[3][0] + columns)%columns][(y + my_row[3][1] +rows)%rows]
+    #     total += next[(x +my_row[4][0] + columns)%columns][(y + my_row[4][1] +rows)%rows]
+    #     total += next[(x +my_row[5][0] + columns)%columns][(y + my_row[5][1] +rows)%rows]
+    # else:
+        #for i in range(6):
+            #total += next[(x +my_row_odd[i][0] + columns)%columns][(y + my_row_odd[i][1] +rows)%rows]
+    #     total += next[(x +my_row_odd[0][0] + columns)%columns][(y+ my_row_odd[0][1] +rows)%rows]
+    #     total += next[(x +my_row_odd[1][0] + columns)%columns][(y+ my_row_odd[1][1] +rows)%rows]
+    #     total += next[(x +my_row_odd[2][0] + columns)%columns][(y+ my_row_odd[2][1] +rows)%rows]
+    #     total += next[(x +my_row_odd[3][0] + columns)%columns][(y+ my_row_odd[3][1] +rows)%rows]
+    #     total += next[(x +my_row_odd[4][0] + columns)%columns][(y+ my_row_odd[4][1] +rows)%rows]
+    #     total += next[(x +my_row_odd[5][0] + columns)%columns][(y+ my_row_odd[5][1] +rows)%rows]
 
     return total
 
@@ -160,27 +179,71 @@ def make_random_grid():
     # So the following could be commented out but I used to it test the
     # the neighbouring scheme which I ultimately used to calculate the neighbours
 
+    # axial coordinates
+    
     x = 7
     y = 7
-    my_row_even = [[-1, -1], [-1, +1], [0, +1], [+1, 0], [0, -1], [-1, 0]]
-    my_row_odd = [[1, 1], [-1, 0], [0, -1], [+1, 0], [0, +1], [+1, -1]]
-    if y%2 == 0:
-        array[(x +my_row_even[0][0] + columns)%columns][(y+ my_row_even[0][1] +rows)%rows] = 1
-        array[(x +my_row_even[1][0] + columns)%columns][(y+ my_row_even[1][1] +rows)%rows] = 1
-        array[(x +my_row_even[2][0] + columns)%columns][(y+ my_row_even[2][1] +rows)%rows] = 1
-        array[(x +my_row_even[3][0] + columns)%columns][(y+ my_row_even[3][1] +rows)%rows] = 1
-        array[(x +my_row_even[4][0] + columns)%columns][(y+ my_row_even[4][1] +rows)%rows] = 1
-        array[(x +my_row_even[5][0] + columns)%columns][(y+ my_row_even[5][1] +rows)%rows] = 1
-    else:
-        array[(x +my_row_odd[0][0] + columns)%columns][(y+ my_row_odd[0][1] +rows)%rows] = 1
-        array[(x +my_row_odd[1][0] + columns)%columns][(y+ my_row_odd[1][1] +rows)%rows] = 1
-        array[(x +my_row_odd[2][0] + columns)%columns][(y+ my_row_odd[2][1] +rows)%rows] = 1
-        array[(x +my_row_odd[3][0] + columns)%columns][(y+ my_row_odd[3][1] +rows)%rows] = 1
-        array[(x +my_row_odd[4][0] + columns)%columns][(y+ my_row_odd[4][1] +rows)%rows] = 1
-        array[(x +my_row_odd[5][0] + columns)%columns][(y+my_row_odd[5][1] + rows)%rows] = 1
+    x, y 
+    horizontal_row = [[0, 3], [1, 3], [2, 3], [3, 3], [4, 3], [5, 3], [6, 3], [7, 3], [8, 3], [9, 3]]
+    vertical_row =   [[4 + floor(0/2), 0], [4 + floor(1/2), 1], [4 + floor(2/2), 2], [4 + floor(3/2), 3], [4 + floor(4/2), 4], [4 + floor(5/2), 5], [4 + floor(6/2), 6], [4 + floor(7/2), 7], [4 + floor(8/2), 8], [4 + floor(9/2), 9]]
+    axial_neighbours = [[0, -1], [-1, 0], [0, +1], [+1, 0], [+1, -1], [-1, 1]]
+
+    for i in range(6):
+        array[x + axial_neighbours[i][0]][y + axial_neighbours[i][1]] = 1
     array[x][y] = 1
 
+
+    # for i in range(len(horizontal_row)):
+    #     array[(horizontal_row[i][0] + columns)%columns][(horizontal_row[i][1] +rows)%rows] = 1
+    #     array[(vertical_row[i][0] + columns)%columns][(vertical_row[i][1] +rows)%rows] = 1
+
+
     return array
+
+def offset_to_axial(offset_x, offset_y):
+    axial_x = offset_x - (floor(offset_y/2))
+    axial_y = offset_y #- (floor(offset_x/2))
+    return axial_x, axial_y
+
+def cubic_z_coordinate(x, y):
+    z = -x -y
+    return z
+
+def find_hexagon(x, y):
+    # this all doesn't work. I still need to figure out how to map it correctly
+    x-=columns
+    y-=rows
+    xVal = floor((x/apothem))
+    yVal = floor((y/(radius*(3/4))))
+    dX = x%apothem
+    dY = y%(radius*(3/4))
+    slope = (radius/4)/(apothem /2)
+    caldY = dX*slope
+    delta = (radius/4) - caldY
+
+    if yVal%2 == 0:
+        if abs(delta) > dY:
+            if delta > 0:
+                xVal -= 1
+                yVal -= 1
+            else:
+                yVal -= 1
+    
+    else:
+        if dX> (apothem/2):
+            if dY < (radius/2) - caldY:
+                yVal -= 1
+        else:
+            if dY>caldY:
+                xVal -=1
+            else:
+                yVal -=1
+    x = xVal
+    y = yVal
+
+    return x, y
+
+
 
 if __name__ == '__main__':
     main()
